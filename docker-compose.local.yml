@@ -21,10 +21,10 @@ services:
 
       - "traefik.http.routers.grafana.rule=Host(`${GRAFANA_DOMAIN:-grafana.localhost}`)"
       - "traefik.http.routers.grafana.entrypoints=websecure"
-      - "traefik.http.routers.grafana.tls.certresolver=le-http"
-      - "traefik.http.routers.grafana.service=grafana"
-      - "traefik.http.routers.grafana.middlewares=internal@docker" # Security Middleware
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.service=aqt"
 
+      # Services
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
 
   prometheus:
