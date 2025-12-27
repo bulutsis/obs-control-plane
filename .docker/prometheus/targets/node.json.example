@@ -1,0 +1,18 @@
+[
+  {
+    "targets": ["10.0.10.11:9100"],
+    "labels": {
+      "product": "example.app",
+      "service": "api",
+      "env": "prod"
+    }
+  },
+  {
+    "targets": ["10.0.10.12:9100"],
+    "labels": {
+      "product": "example.ai",
+      "service": "inference",
+      "env": "prod"
+    }
+  }
+]

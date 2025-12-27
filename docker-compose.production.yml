@@ -1,0 +1,65 @@
+services:
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: obs-grafana
+    restart: unless-stopped
+    networks:
+      - traefik-network
+      - observability
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./.docker/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-secret}
+      GF_SERVER_DOMAIN: ${GRAFANA_DOMAIN:-grafana.localhost}
+      GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-https://grafana.localhost}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.grafana.rule=Host(`${GRAFANA_DOMAIN:-grafana.localhost}`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
+  prometheus:
+    image: prom/prometheus:v2.49.0
+    container_name: obs-prometheus
+    restart: unless-stopped
+    networks:
+      - observability
+    volumes:
+      - prometheus-data:/prometheus
+      - ./.docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./.docker/prometheus/targets:/etc/prometheus/targets:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=${PROM_RETENTION:-15d}"
+      - "--web.enable-lifecycle"
+
+  loki:
+    image: grafana/loki:2.9.3
+    container_name: obs-loki
+    restart: unless-stopped
+    networks:
+      - observability
+    volumes:
+      - loki-data:/loki
+      - ./.docker/loki/config.yml:/etc/loki/config.yml:ro
+    command:
+      - "-config.file=/etc/loki/config.yml"
+
+
+volumes:
+  prometheus-data:
+  loki-data:
+  grafana-data:
+
+
+networks:
+  traefik-network:
+    external: true
+  observability:
+    driver: bridge
