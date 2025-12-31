@@ -15,6 +15,13 @@ services:
       GF_SERVER_DOMAIN: ${GRAFANA_DOMAIN:-grafana.localhost}
       GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-https://grafana.localhost}
       GF_USERS_ALLOW_SIGN_UP: "false"
+
+      GF_DATABASE_TYPE: 'mysql'
+      GF_DATABASE_HOST: '${MYSQL_HOST}:3306'
+      GF_DATABASE_NAME: '${MYSQL_DATABASE}'
+      GF_DATABASE_USER: '${MYSQL_USER}'
+      GF_DATABASE_PASSWORD: '${MYSQL_PASSWORD}'
+      GF_DATABASE_SSL_MODE: disable
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-network"
@@ -31,6 +38,8 @@ services:
     image: prom/prometheus:v2.49.0
     container_name: obs-prometheus
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - observability
     volumes:
@@ -55,8 +64,24 @@ services:
     command:
       - "-config.file=/etc/loki/config.yml"
 
+  mysql:
+    image: mysql:8.0
+    container_name: grafana-mysql
+    environment:
+      MYSQL_DATABASE: '${MYSQL_DATABASE}'
+      MYSQL_USER: '${MYSQL_USER}'
+      MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
+      MYSQL_ROOT_PASSWORD: '${MYSQL_PASSWORD}'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+    restart: unless-stopped
+
 
 volumes:
+  mysql-data:
   prometheus-data:
   loki-data:
   grafana-data:

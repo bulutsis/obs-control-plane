@@ -1,6 +1,9 @@
 [
   {
-    "targets": ["10.0.10.11:9100"],
+    "targets": [
+      "host.docker.internal:9100",
+      "host.docker.internal:8080"
+    ],
     "labels": {
       "product": "example.app",
       "service": "api",
@@ -8,7 +11,10 @@
     }
   },
   {
-    "targets": ["10.0.10.12:9100"],
+    "targets": [
+        "10.0.10.12:9100",
+        "10.0.10.12:8080"
+    ],
     "labels": {
       "product": "example.ai",
       "service": "inference",
