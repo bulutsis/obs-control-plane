@@ -13,3 +13,7 @@ scrape_configs:
       - files:
           - /etc/prometheus/targets/*.json
         refresh_interval: 30s
+
+    relabel_configs:
+      - source_labels: [server]
+        target_label: instance
